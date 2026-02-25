@@ -14,7 +14,14 @@
     "write-translations": "docusaurus write-translations",
     "write-heading-ids": "docusaurus write-heading-ids",
     "validate-glossary": "node scripts/validate-glossary-terms.js",
-    "wrap-glossary": "node scripts/wrap-glossary-terms.js"
+    "wrap-glossary": "node scripts/wrap-glossary-terms.js",
+    "generate-lifecycle-json": "node scripts/generate-lifecycle-json.js",
+    "generate-compatibility-matrix": "node scripts/generate-compatibility-matrix.js",
+    "sync-feature-tables": "node scripts/sync-feature-tables.js",
+    "validate-feature-tables": "node scripts/sync-feature-tables.js --dry-run",
+    "sync-upstream": "node scripts/sync-upstream-features.js",
+    "validate-upstream": "node scripts/sync-upstream-features.js --dry-run",
+    "validate-versioned-links": "node scripts/validate-versioned-links.js"
   },
   "dependencies": {
     "@docusaurus/core": "3.8.0",
@@ -27,7 +34,7 @@
     "@saucelabs/theme-github-codeblock": "^0.3.0",
     "clsx": "^2.1.1",
     "docusaurus-plugin-sass": "^0.2.6",
-    "mermaid": "^11.10.0",
+    "mermaid": "^11.12.3",
     "plugin-image-zoom": "flexanalytics/plugin-image-zoom",
     "prism-react-renderer": "^2.4.1",
     "raw-loader": "^4.0.2",
@@ -41,8 +48,8 @@
   "devDependencies": {
     "@docusaurus/module-type-aliases": "3.8.0",
     "@docusaurus/types": "3.8.0",
-    "glob": "^10.3.10",
-    "js-yaml": "^4.1.0"
+    "glob": "^11.1.0",
+    "js-yaml": "^4.1.1"
   },
   "browserslist": {
     "production": [

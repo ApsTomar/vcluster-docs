@@ -1,75 +1,61 @@
 ---
-title: Sleep mode and auto delete for virtual clusters
-sidebar_label: Sleep mode and auto delete
+title: Auto sleep and auto delete
+sidebar_label: Auto Sleep & Auto Delete
 sidebar_position: 1
+sidebar_class_name: pro
 ---
-import Tabs from "@theme/Tabs";
-import TabItem from "@theme/TabItem";
-import PartialActivityDetection from "../../../_partials/sleep/activity-detection.mdx";
-import PartialAdvancedConfiguration from "../../../_partials/sleep/advanced-configuration.mdx";
-import PartialWorkingWithSleepMode from "../../../_partials/sleep/working-with-sleep-mode.mdx";
-import PartialSleepConfigureUI from "../../../_partials/sleep/configure-ui.mdx";
-import PartialSleepManualUI from "../../../_partials/sleep/manual-ui.mdx";
-import PartialSleepScheduleUI from "../../../_partials/sleep/schedule-ui.mdx";
-import PartialSleepWakeUI from "../../../_partials/sleep/wake-ui.mdx";
-import PartialAutoDeleteConfigureUI from "../../../_partials/auto-delete/configure-ui.mdx";
+import FeatureTable from '@site/src/components/FeatureTable';
+
+<FeatureTable names="vcluster-sleep-mode" />
+
 
 :::info
-Platform sleep has been integrated into the standard sleep configuration and is no longer a separate feature.
+Platform auto sleep has been integrated into the standard sleep configuration and is no longer a separate feature.
 :::
 
-# Sleep mode and auto delete for virtual clusters
+# Auto sleep and auto delete for virtual clusters
 
 The platform provides two features to reduce Kubernetes costs:
 
-- **Sleep mode** puts virtual clusters to sleep when nobody is using them. This removes all pods while keeping all resources inside the virtual clusters during periods of inactivity.
+- **Auto Sleep** puts virtual clusters to sleep when nobody is using them. This removes all pods while keeping all resources inside the virtual clusters during periods of inactivity.
 - **Auto-delete** deletes virtual clusters that have been idle for a while.
 
-Both features rely on the platform's [inactivity detection](#inactivity-detection).
+Both features rely on the platform's inactivity detection.
 
-## Work with sleep mode
+## Configure auto sleep
 
-<PartialWorkingWithSleepMode name="virtual cluster"/>
+Auto sleep can be configured per virtual cluster instance. When enabled, the platform monitors activity and puts the virtual cluster to sleep after a configured period of inactivity.
 
-### Manual and automatic sleep
+To configure auto sleep in the Platform UI:
 
-<details>
- <summary>Start sleep manually</summary>
- <PartialSleepManualUI name="virtual cluster" kind="Virtual Cluster" />
-</details>
+1. Navigate to the **Virtual Clusters** view.
+2. Select the virtual cluster you want to configure.
+3. Click **Edit** and navigate to the **Sleep Mode** section.
+4. Enable auto sleep and configure the inactivity timeout.
+5. Click **Save**.
 
-<details>
- <summary>Configure automatic sleep mode</summary>
- <PartialSleepConfigureUI name="vCluster instance" />
-</details>
+You can also start sleep manually from the virtual cluster's ellipsis menu in the Platform UI.
 
-<details>
- <summary>Wake up virtual cluster</summary>
- <PartialSleepWakeUI name="virtual cluster" />
-</details>
+For detailed vCluster-specific sleep mode configuration and examples, including `vcluster.yaml` settings, scheduled sleep, and advanced configuration, see the [vCluster sleep mode documentation](/docs/vcluster/configure/vcluster-yaml/sleep).
 
-### Scheduled sleep
-
-<details>
- <summary>Configure scheduled sleep and wake-up</summary>
- <PartialSleepScheduleUI name="virtual cluster" />
-</details>
-
-## Work with auto-delete
+## Configure auto-delete
 
 The platform lets you configure auto-delete for virtual clusters that have not been used for a certain period of time.
 
-<details>
- <summary>Configure auto-delete timeout</summary>
- <PartialAutoDeleteConfigureUI name="virtual cluster" />
-</details>
+To configure auto-delete in the Platform UI:
+
+1. Navigate to the **Virtual Clusters** view.
+2. Select the virtual cluster you want to configure.
+3. Click **Edit** and navigate to the **Auto-Delete** section.
+4. Enable auto-delete and configure the inactivity timeout.
+5. Click **Save**.
+
+For detailed configuration options, see the [vCluster auto-delete documentation](/docs/vcluster/configure/vcluster-yaml/sleep#configure-auto-delete).
 
 ## Inactivity detection
 
-<PartialActivityDetection name="virtual cluster" />
+All requests that are made through the platform count as activity in the virtual cluster. This includes `kubectl` requests, API requests, and access through the platform UI.
 
-## Advanced configuration
+The platform tracks activity based on requests that are proxied through the platform. Direct access to the virtual cluster API server (for example, via ingress access) is not tracked by the platform's inactivity detection.
 
-<PartialAdvancedConfiguration name="virtual cluster" />
-
-For detailed vCluster-specific sleep mode configuration and examples, see the [vCluster sleep mode documentation](/docs/vcluster/configure/vcluster-yaml/sleep-mode).
+If you need more advanced activity detection, see the [vCluster sleep mode documentation](/docs/vcluster/configure/vcluster-yaml/sleep) for configuration options including custom activity annotations.

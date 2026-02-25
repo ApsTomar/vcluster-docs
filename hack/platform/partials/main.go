@@ -13,12 +13,13 @@ import (
 	clusterv1 "github.com/loft-sh/agentapi/v4/pkg/apis/loft/cluster/v1"
 	managementv1 "github.com/loft-sh/api/v4/pkg/apis/management/v1"
 	storagev1 "github.com/loft-sh/api/v4/pkg/apis/storage/v1"
-	orderedmap "github.com/wk8/go-ordered-map/v2"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
+
+var paths []string
 
 func main() {
 	if len(os.Args) != 2 {
@@ -134,84 +135,6 @@ isolation:
 					{
 						Verbs: []string{"get"},
 						Users: []string{"*"},
-					},
-				},
-			},
-		},
-		Create:   true,
-		Retrieve: true,
-		Update:   true,
-		Delete:   true,
-	})
-
-	// DevPodInstance
-	util.GenerateObjectOverview(&util.ObjectInformation{
-		Title:       "DevPod Workspace Instance",
-		Name:        "DevPodWorkspaceInstance",
-		Resource:    "devpodworkspaceinstances",
-		Description: "A DevPod workspace.",
-		File:        path.Join(util.BaseResourcesPath, "devpodworkspaceinstance/devpodworkspaceinstance.mdx"),
-		Object: &managementv1.DevPodWorkspaceInstance{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "DevPodWorkspaceInstance",
-				APIVersion: managementv1.SchemeGroupVersion.String(),
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "my-devpod-workspace",
-				Namespace: "loft-p-my-project",
-			},
-			Spec: managementv1.DevPodWorkspaceInstanceSpec{
-				DevPodWorkspaceInstanceSpec: storagev1.DevPodWorkspaceInstanceSpec{
-					DisplayName: "my-display-name",
-					Owner: &storagev1.UserOrTeam{
-						User: "my-user",
-					},
-					Parameters: "my-parameter: my-value",
-					TemplateRef: &storagev1.TemplateRef{
-						Name: "my-devpod-workspace-template",
-					},
-				},
-			},
-		},
-		Project:  true,
-		Create:   true,
-		Retrieve: true,
-		Update:   true,
-		Delete:   true,
-	})
-
-	// DevPodTemplate
-	util.GenerateObjectOverview(&util.ObjectInformation{
-		Title:       "DevPod Workspace Template",
-		Name:        "DevPodWorkspaceTemplate",
-		Resource:    "devpodworkspacetemplates",
-		Description: "A DevPod workspace template.",
-		File:        path.Join(util.BaseResourcesPath, "devpodworkspacetemplate.mdx"),
-		Object: &managementv1.DevPodWorkspaceTemplate{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "DevPodWorkspaceTemplate",
-				APIVersion: managementv1.SchemeGroupVersion.String(),
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "my-devpod-workspace-template",
-			},
-			Spec: managementv1.DevPodWorkspaceTemplateSpec{
-				DevPodWorkspaceTemplateSpec: storagev1.DevPodWorkspaceTemplateSpec{
-					DisplayName: "my-display-name",
-					Parameters: []storagev1.AppParameter{
-						{
-							Variable: "myVar",
-						},
-					},
-					Template: storagev1.DevPodWorkspaceTemplateDefinition{
-						Provider: &storagev1.DevPodWorkspaceProvider{
-							Name: "kubernetes",
-							Options: map[string]storagev1.DevPodProviderOption{
-								"KUBERNETES_NAMESPACE": {
-									Value: "{{ .Values.loft.name }}",
-								},
-							},
-						},
 					},
 				},
 			},
@@ -982,42 +905,42 @@ spec:
 								NamedNodeTypeSpec: storagev1.NamedNodeTypeSpec{
 									Name: "medium",
 									NodeTypeSpec: storagev1.NodeTypeSpec{
-									Resources: corev1.ResourceList{
-										corev1.ResourceCPU:    resource.MustParse("2"),
-										corev1.ResourceMemory: resource.MustParse("4Gi"),
+										Resources: corev1.ResourceList{
+											corev1.ResourceCPU:    resource.MustParse("2"),
+											corev1.ResourceMemory: resource.MustParse("4Gi"),
+										},
+										Properties: map[string]string{
+											"instance-type": "t3.medium",
+										},
 									},
-									Properties: map[string]string{
-										"instance-type": "t3.medium",
-									},
-								},
 								},
 							},
 							{
 								NamedNodeTypeSpec: storagev1.NamedNodeTypeSpec{
 									Name: "large",
 									NodeTypeSpec: storagev1.NodeTypeSpec{
-									Resources: corev1.ResourceList{
-										corev1.ResourceCPU:    resource.MustParse("2"),
-										corev1.ResourceMemory: resource.MustParse("8Gi"),
+										Resources: corev1.ResourceList{
+											corev1.ResourceCPU:    resource.MustParse("2"),
+											corev1.ResourceMemory: resource.MustParse("8Gi"),
+										},
+										Properties: map[string]string{
+											"instance-type": "t3.large",
+										},
 									},
-									Properties: map[string]string{
-										"instance-type": "t3.large",
-									},
-								},
 								},
 							},
 							{
 								NamedNodeTypeSpec: storagev1.NamedNodeTypeSpec{
 									Name: "xlarge",
 									NodeTypeSpec: storagev1.NodeTypeSpec{
-									Resources: corev1.ResourceList{
-										corev1.ResourceCPU:    resource.MustParse("4"),
-										corev1.ResourceMemory: resource.MustParse("8Gi"),
+										Resources: corev1.ResourceList{
+											corev1.ResourceCPU:    resource.MustParse("4"),
+											corev1.ResourceMemory: resource.MustParse("8Gi"),
+										},
+										Properties: map[string]string{
+											"instance-type": "c5.xlarge",
+										},
 									},
-									Properties: map[string]string{
-										"instance-type": "c5.xlarge",
-									},
-								},
 								},
 							},
 						},
@@ -1039,12 +962,6 @@ spec:
 	if err != nil {
 		panic(fmt.Errorf("failed to parse JSON schema from %q: %w", jsonSchemaPath, err))
 	}
-	externalProperty, ok := schema.Properties.Get("external")
-
-	if !ok {
-		panic("external property not found in " + jsonSchemaPath)
-	}
-	walkTree(externalProperty, schema, "external", "")
 
 	// fmt.Println("properties:")
 	// for childNode := schema.Properties.Oldest(); childNode != nil; childNode = childNode.Next() {
@@ -1059,38 +976,4 @@ spec:
 			continue
 		}
 	}
-}
-
-var paths []string
-
-func walkTree(node, parent *jsonschema.Schema, name, parentName string) bool {
-	if node == nil || getChildren(node, parent) == nil {
-		return true
-	} else {
-		parentName = fmt.Sprintf("%s/%s", parentName, name)
-		paths = append(paths, parentName)
-	}
-	children := getChildren(node, parent)
-
-	for childNode := children.Oldest(); childNode != nil; childNode = childNode.Next() {
-		if walkTree(childNode.Value, parent, childNode.Key, parentName) {
-			continue
-		}
-	}
-	return true
-}
-
-func getChildren(node *jsonschema.Schema, parentSchema *jsonschema.Schema) *orderedmap.OrderedMap[string, *jsonschema.Schema] {
-	if node == nil {
-		return nil
-	}
-	if node.Ref != "" {
-		refSplit := strings.Split(node.Ref, "/")
-		fieldSchema, ok := parentSchema.Definitions[refSplit[len(refSplit)-1]]
-		if !ok {
-			panic(fmt.Errorf("schema definition %q not found in reference %q", refSplit[len(refSplit)-1], node.Ref))
-		}
-		return fieldSchema.Properties
-	}
-	return nil
 }

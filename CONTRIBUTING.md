@@ -3,26 +3,7 @@
 This docs website is built using [Docusaurus](https://docusaurus.io/) v3, a
 modern static website generator.
 
-## Quick start with DevPod
-
-Use DevPod to quickly set up a complete development environment and start
-contributing.
-
-1. [Install DevPod](https://devpod.sh/docs/getting-started/install) for your
-   operating system.
-2. Once installed, click the following to open this repository in DevPod:
-
-[![Open in DevPod](https://devpod.sh/assets/open-in-devpod.svg)](https://devpod.sh/open#https://github.com/loft-sh/vcluster-docs)
-
-This will automatically set up all dependencies and configurations needed for
-working on the documentation, including:
-
-- Node.js and npm for running the development server
-- The Vale linter for checking documentation style and grammar
-- VS Code extensions for Vale and ESLint
-- Pre-configured settings for the documentation workflow
-
-## Manual deployment
+## Getting started
 
 Fork the [vCluster docs repository](https://github.com/loft-sh/vcluster-docs) and clone your fork locally
 
@@ -67,6 +48,26 @@ npm run serve
 
 Before making a pull request, it's recommended to run this command to
 fix any broken links that may have been introduced.
+
+## AI-assisted PR review
+
+Pull requests can receive an on-demand AI review from Claude. Mention `@claude`
+in a PR comment to trigger a review.
+
+Example commands:
+
+- `@claude review this PR` - get a focused review
+- `@claude fix the linting issues` - ask for specific changes
+- `@claude update the examples to use the new API` - request targeted updates
+
+Claude can also work on fork PRs. Since it can't push directly to external
+forks, ask it to create a PR with changes:
+
+- `@claude create a PR with your suggested changes to this PR`
+
+The review checks documentation style, validates vCluster YAML configurations,
+and identifies broken links. The AI review is meant to assist, not replace,
+human review.
 
 ## Style guide
 
@@ -165,6 +166,25 @@ Use `<>` to indicate placeholders in code blocks. For example:
 kubectl get pods <pod-name>
 ```
 
+#### Dynamic version tokens
+
+Instead of hardcoding version numbers that go stale, use these tokens:
+
+| Token | Renders as |
+|-------|------------|
+| `__PLATFORM_VERSION__` | Latest platform version (e.g., 4.5.0) |
+| `__VCLUSTER_VERSION__` | Latest vCluster version (e.g., 0.30.0) |
+| `__PLATFORM_VERSION_MINOR__` | Minor version only (e.g., 4.5) |
+| `__VCLUSTER_VERSION_MINOR__` | Minor version only (e.g., 0.30) |
+
+```bash
+export PLATFORM_VERSION=__PLATFORM_VERSION__
+helm install vcluster --version __VCLUSTER_VERSION__
+```
+
+Tokens are replaced at build time by a remark plugin. In versioned docs
+(e.g., `/platform/4.3.0/`), tokens resolve to that version instead of latest.
+
 #### Interactive code blocks
 
 For code blocks that contain values users need to customize, use the `InterpolatedCodeBlock` component instead of regular code blocks. This allows users to edit values directly in the documentation.
@@ -199,6 +219,61 @@ Notes:
 - Place `PageVariables` before any code blocks that use those variables
 - Can be placed anywhere on the page (doesn't have to be at the top)
 - Multiple `PageVariables` components will merge together
+
+**Adding titles to code blocks** (optional):
+
+The `InterpolatedCodeBlock` component supports an optional `title`
+attribute to display a descriptive title above the code block:
+
+```mdx
+<InterpolatedCodeBlock
+  code={`export CLUSTER_NAME=[[VAR:CLUSTER_NAME:vcluster-demo]]
+export REGION=[[VAR:REGION:eu-central-1]]`}
+  language="bash"
+  title="Set environment variables"
+/>
+```
+
+The `title` attribute is completely optional and backwards compatible.
+Existing code blocks without a title will continue to work as before.
+
+#### Icon component
+
+Use the `Icon` component to display checkmarks, crosses or warnings for feature availability, comparison tables, or
+inline indicators.
+
+**Usage:**
+
+```mdx
+import Icon from '@site/src/components/Icon';
+
+| Feature | Supported |
+|---------|-----------|
+| Connection pooling | <Icon type="check" /> |
+| SSL encryption | <Icon type="warning" /> |
+| Legacy auth | <Icon type="cross" /> |
+```
+
+**Inline usage:**
+
+```mdx
+Connection pooling <Icon type="check" /> is available in all tiers.
+```
+
+**With custom tooltips:**
+
+```mdx
+<Icon type="check" title="Available in all tiers" />
+<Icon type="cross" title="Deprecated in v4.0" />
+```
+
+**Icon types:**
+
+- `type="check"` or `type="checkmark"` - Orange checkmark (light mode), green (dark mode)
+- `type="cross"` or `type="x"` - Gray X symbol
+- `type="warning"` or `type="!"` - Yellow ! symbol
+
+The component automatically adapts to dark/light theme changes.
 
 #### Formatting and variables
 
@@ -264,7 +339,7 @@ in the code to highlight lines. See .
 
 ### vCluster terms
 
-LoftLabs is the company. Do not use "Loft" or "Loft Platform" to refer to
+vCluster Labs is the company. Do not use "Loft", "LoftLabs", or "Loft Platform" to refer to
 vCluster products.
 
 "vCluster" is a trademark. There are strict legal frameworks around how to use a
@@ -343,10 +418,6 @@ process.
 VSCode and Neovim have `vale` plugins that can be installed to lint files as you
 write them.
 
-> [!NOTE]
-> If you're using DevPod with the "Open in DevPod" link above, Vale and the VS
-> Code extension are automatically installed and configured for you!
-
 - VS Code [Vale plugin](https://github.com/errata-ai/vale-vscode).
 - Neovim setup:
   - Install [mason.nvim](https://github.com/williamboman/mason.nvim) and add
@@ -374,42 +445,20 @@ write them.
 
 ### Controlling Vale rules
 
-Disabling all rules
+Use these HTML-style comments to control Vale checking:
 
-- Use these HTML-style comments to control Vale checking:
+```text
+<!-- vale off -->  // Stops all Vale checks
+<!-- vale on -->   // Resumes Vale checks
+```
 
-  ```
-  <!-- vale off -->  // Stops all Vale checks
-  <!-- vale on -->   // Resumes Vale checks
-  ```
+Example usage:
 
-- Example usage:
-  ```
-  <!-- vale off -->
-  <!-- this section ignores all Vale rules -->
-  This content won't be checked by Vale.
-  <!-- vale on -->
-  ```
-
-Disabling specific rules
-
-- Target individual rules with this syntax:
-  ```
-  <!-- vale RuleName = NO -->  // Disables one rule
-  <!-- vale RuleName = YES --> // Re-enables that rule
-  ```
-
-Important formatting requirements:
-
-- Use capital "YES" and "NO"
-- Include spaces around the equals sign
-- Specify the full rule name
-
-- Example usage:
-  ```
-  <!-- vale Google.Contractions = NO -->
-  This section ignores only the contractions rule
-  <!-- vale Google.Contractions = YES -->
-  ```
+```text
+<!-- vale off -->
+<!-- this section ignores all Vale rules -->
+This content won't be checked by Vale.
+<!-- vale on -->
+```
 
 <!-- vale on -->

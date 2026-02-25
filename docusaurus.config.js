@@ -9,6 +9,7 @@ import { themes as prismThemes } from "prism-react-renderer";
 const __webpack_public_path__ = "/docs/";
 
 import resolveGlob from "resolve-glob";
+import remarkVersionTokens from "./plugins/remark-version-tokens.js";
 
 const newDocTemplate = `---
 title: Your Document Title
@@ -75,10 +76,13 @@ const config = {
           sidebarPath: require.resolve("./sidebars.js"),
           editUrl: "https://github.com/loft-sh/vcluster-docs/edit/main/",
           editCurrentVersion: true,
+          beforeDefaultRemarkPlugins: [
+            [remarkVersionTokens, { siteDir: __dirname }],
+          ],
           lastVersion: "current",
           versions: {
             current: {
-              label: "v0.29",
+              label: "v0.32",
               banner: "none",
               badge: false,
             },
@@ -105,9 +109,9 @@ const config = {
                 return { ...item, priority: 1.0, changefreq: 'daily' };
               }
 
-              // Latest stable versions get highest priority (0.29.0 for vCluster, 4.4.0 for platform)
-              if (item.url.match(/\/vcluster\/0\.29\.0\//) ||
-                  item.url.match(/\/platform\/4\.4\.0\//)) {
+              // Latest stable versions get highest priority (0.32.0 for vCluster, 4.7.0 for platform)
+              if (item.url.match(/\/vcluster\/0\.32\.0\//) ||
+                  item.url.match(/\/platform\/4\.7\.0\//)) {
                 return { ...item, priority: 1.0, changefreq: 'daily' };
               }
 
@@ -117,7 +121,7 @@ const config = {
                 return { ...item, priority: 0.8, changefreq: 'weekly' };
               }
 
-              // ALL other versioned docs get very low priority (0.19-0.28 for vCluster, older platform versions)
+              // ALL other versioned docs get very low priority (0.19-0.31 for vCluster, older platform versions)
               if (item.url.match(/\/vcluster\/\d+\.\d+\.\d+\//) ||
                   item.url.match(/\/platform\/\d+\.\d+\.\d+\//)) {
                 return { ...item, priority: 0.1, changefreq: 'yearly' };
@@ -189,34 +193,37 @@ const config = {
         editUrl: ({ versionDocsDirPath, docPath }) =>
           `https://github.com/loft-sh/vcluster-docs/edit/main/${versionDocsDirPath}/${docPath}`,
         editCurrentVersion: true,
-        lastVersion: "0.29.0",
-        onlyIncludeVersions: ["current", "0.29.0", "0.28.0", "0.27.0", "0.26.0", "0.25.0"],
+        beforeDefaultRemarkPlugins: [
+          [remarkVersionTokens, { siteDir: __dirname }],
+        ],
+        lastVersion: "0.32.0",
+        onlyIncludeVersions: ["current", "0.32.0", "0.31.0", "0.30.0", "0.29.0", "0.28.0"],
         versions: {
           current: {
             label: "main 🚧",
           },
+          "0.32.0": {
+            label: "v0.32 Stable",
+            banner: "none",
+            badge: true,
+          },
+          "0.31.0": {
+            label: "v0.31",
+            banner: "none",
+            badge: true,
+          },
+          "0.30.0": {
+            label: "v0.30",
+            banner: "none",
+            badge: true,
+          },
           "0.29.0": {
-            label: "v0.29 Stable",
+            label: "v0.29",
             banner: "none",
             badge: true,
           },
           "0.28.0": {
             label: "v0.28",
-            banner: "none",
-            badge: true,
-          },
-          "0.27.0": {
-            label: "v0.27",
-            banner: "none",
-            badge: true,
-          },
-          "0.26.0": {
-            label: "v0.26 (EOS)",
-            banner: "none",
-            badge: true,
-          },
-          "0.25.0": {
-            label: "v0.25 (EOS)",
             banner: "none",
             badge: true,
           },
@@ -233,24 +240,28 @@ const config = {
         editUrl: ({ versionDocsDirPath, docPath }) =>
           `https://github.com/loft-sh/vcluster-docs/edit/main/${versionDocsDirPath}/${docPath}`,
         editCurrentVersion: true,
-        lastVersion: "4.4.0",
+        beforeDefaultRemarkPlugins: [
+          [remarkVersionTokens, { siteDir: __dirname }],
+        ],
+        lastVersion: "4.7.0",
+        onlyIncludeVersions: ["current", "4.7.0", "4.6.0", "4.5.0"],
         versions: {
           current: {
             label: "main 🚧",
           },
-          "4.4.0": {
-            label: "v4.4 Stable",
+          "4.7.0": {
+            label: "v4.7 Stable",
             banner: "none",
             badge: true,
           },
-          "4.3.0": {
-            label: "v4.3",
+          "4.6.0": {
+            label: "v4.6",
             banner: "none",
             badge: true,
           },
-          "4.2.0": {
-            label: "v4.2 (EOL)",
-            banner: "unmaintained",
+          "4.5.0": {
+            label: "v4.5",
+            banner: "none",
             badge: true,
           },
         },
@@ -264,12 +275,12 @@ const config = {
         "https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js",
       async: true,
     },
-    {
-      src: "/docs/js/custom.js",
-      async: true,
-    },
   ],
-  clientModules: resolveGlob.sync(["./src/js/**/*.js"]),
+  clientModules: [
+    './src/client/MermaidPolyfillsClient.js',
+    './src/client/ConfigNavigationClient.js',
+    './src/client/DetailsClicksClient.js',
+  ],
 
   themeConfig: (
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
@@ -286,7 +297,7 @@ const config = {
         theme: { light: "default", dark: "dark" },
         options: {
           flowchart: {
-            htmlLabels: true,
+            htmlLabels: false,
             curve: 'basis'
           },
           fontSize: 14
@@ -374,13 +385,6 @@ const config = {
                     Create New Doc
                   </a>
                 `
-              },
-              {
-                html: `
-                  <a href="https://devpod.sh/open#https://github.com/loft-sh/vcluster-docs" target="_blank" class="footer-devpod-link" aria-label="Open in DevPod">
-                    Open in DevPod
-                  </a>
-                `
               }
             ]
           },
@@ -392,9 +396,9 @@ const config = {
         additionalLanguages: ["bash", "hcl"],
       },
       announcementBar: {
-        id: "platform-4-4-release",
+        id: "vcluster-0-32-release",
         content:
-          '🚀 <strong>New releases: <a href="https://www.vcluster.com/releases/en/changelog?hideLogo=true&hideMenu=true&theme=dark&embed=true&c=vCluster" target="_blank">vCluster Platform 4.4 and vCluster 0.29</a></strong>',
+          '🚀 <strong>New releases: <a href="https://www.vcluster.com/releases/en/changelog?hideLogo=true&hideMenu=true&theme=dark&embed=true&c=vCluster" target="_blank">vCluster Platform 4.7 and vCluster 0.32</a></strong>',
         backgroundColor: "#4a90e2",
         textColor: "#ffffff",
         isCloseable: true,
